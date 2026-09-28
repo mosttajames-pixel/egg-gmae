@@ -267,10 +267,10 @@
         </div>
       </div>
 
-      <!-- 顯眼巨型數位倒數計時器 (放大 1.5 倍) -->
-      <div class="bg-slate-900 text-emerald-400 rounded-3xl py-6 px-6 sm:px-10 inline-block shadow-2xl border-8 border-slate-700 max-w-xl w-full my-2">
+      <!-- 顯眼巨型數位倒數計時器 (放大 1.5 倍，黑框左右擴擴 20%) -->
+      <div class="bg-slate-900 text-emerald-400 rounded-3xl py-6 px-8 sm:px-16 inline-block shadow-2xl border-8 border-slate-700 max-w-3xl w-full my-2">
         <div class="text-xl sm:text-2xl font-black text-slate-300 tracking-wider mb-2">倒數時間 REMAINING TIME</div>
-        <div id="timerDisplay" class="text-7xl sm:text-8xl lg:text-[10rem] leading-none font-black tracking-widest font-mono drop-shadow-[0_0_18px_rgba(52,211,153,0.7)] py-2">
+        <div id="timerDisplay" class="text-7xl sm:text-8xl lg:text-[10rem] leading-none font-black tracking-widest font-mono tabular-nums drop-shadow-[0_0_18px_rgba(52,211,153,0.7)] py-2">
           02:00
         </div>
       </div>
