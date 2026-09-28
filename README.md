@@ -1,1 +1,615 @@
-# egg-gmae
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分蛋遊戲 - 老友記互動提示板</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for clear readability -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@600;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial, sans-serif;
+      background-color: #FFFBEB;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Standardized Senior-friendly typography dynamics */
+    .text-senior-huge {
+      font-size: clamp(2.25rem, 6vw, 3.5rem); /* 36px - 56px */
+      line-height: 1.2;
+    }
+    .text-senior-title {
+      font-size: clamp(2rem, 5vw, 2.75rem); /* 32px - 44px */
+      line-height: 1.2;
+    }
+    .text-senior-subtitle {
+      font-size: clamp(1.5rem, 3.5vw, 2.25rem); /* 24px - 36px */
+      line-height: 1.3;
+    }
+    .text-senior-body {
+      font-size: clamp(1.25rem, 2.8vw, 1.75rem); /* 20px - 28px */
+      line-height: 1.5;
+    }
+
+    /* Tactile 3D Button Shadows & Touch Animations */
+    .btn-tactile {
+      transition: all 0.15s ease-in-out;
+      box-shadow: 0 8px 0 rgba(0,0,0,0.15), 0 10px 15px rgba(0,0,0,0.1);
+    }
+    .btn-tactile:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15), 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Soft visual pulse for active timer */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.99); opacity: 0.9; }
+      50% { transform: scale(1.01); opacity: 1; }
+      100% { transform: scale(0.99); opacity: 0.9; }
+    }
+    .timer-running {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+
+    /* Custom canvas overlay for confetti */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body class="bg-amber-50/50 text-slate-800 min-h-screen flex flex-col justify-between p-3 sm:p-6 lg:p-8">
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="max-w-7xl mx-auto w-full space-y-4 sm:space-y-6">
+
+    <!-- 1. 遊戲標題與即時時間區 -->
+    <header class="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 rounded-3xl p-4 sm:p-6 shadow-lg text-slate-900 border-4 border-amber-300">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+        
+        <!-- 標題名稱 -->
+        <div class="flex items-center space-x-3 sm:space-x-4">
+          <span class="text-5xl sm:text-6xl lg:text-7xl filter drop-shadow-md" role="img" aria-label="蛋類圖示">🥚🍳</span>
+          <div>
+            <h1 class="text-senior-title font-extrabold tracking-wide text-amber-950 drop-shadow-sm">
+              分蛋遊戲 <span class="text-2xl sm:text-3xl block sm:inline text-amber-900 font-bold">(實體提示板)</span>
+            </h1>
+            <p class="text-amber-900/90 text-lg sm:text-xl font-bold mt-1">老友記動動手、動動腦大作戰！</p>
+          </div>
+        </div>
+
+        <!-- 即時時間顯示 -->
+        <div class="bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border-2 border-amber-600/30 shadow-md text-center">
+          <div class="text-sm font-bold text-amber-800 tracking-wider">即時時間 CURRENT TIME</div>
+          <div id="clockDisplay" class="text-2xl sm:text-3xl font-black text-orange-600 tracking-wider">
+            10:00:00 AM
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- 2. 獨立放大日期展示區塊（以便老友記查看） -->
+    <section class="bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-300 border-4 border-amber-400 rounded-3xl p-4 sm:p-6 text-center shadow-md">
+      <div class="text-amber-900/90 font-extrabold text-lg sm:text-xl tracking-wide mb-1">
+        📅 今天日期（Date）
+      </div>
+      <div id="bigDateDisplay" class="text-senior-huge font-black text-amber-950 tracking-wider drop-shadow-sm">
+        2026年9月28日 星期一
+      </div>
+    </section>
+
+    <!-- 3. 分類提示區 (兩欄並排，專為膠蛋遊戲調整) -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+      
+      <!-- 左區塊：雞蛋 (暖黃/橙色系) -->
+      <div class="bg-gradient-to-br from-amber-100 via-orange-100 to-yellow-200 border-4 border-amber-400 rounded-3xl p-5 sm:p-7 shadow-lg flex flex-col justify-between">
+        <div>
+          <!-- 卡片頂部標題 -->
+          <div class="flex items-center justify-between bg-amber-400/90 px-4 py-3 rounded-2xl mb-4 border-2 border-amber-500">
+            <h2 class="text-senior-title font-black text-amber-950 flex items-center gap-2">
+              <span>🥚</span> 雞蛋
+            </h2>
+            <span class="bg-amber-600 text-white font-extrabold text-xl px-4 py-1.5 rounded-full shadow">
+              黃色籃子 🟡
+            </span>
+          </div>
+
+          <!-- 視覺圖示區 -->
+          <div class="bg-white/85 rounded-2xl p-5 my-3 text-center border-2 border-amber-300 shadow-inner flex flex-col items-center justify-center">
+            <svg class="w-28 h-28 sm:w-36 sm:h-36 drop-shadow-md" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M50 8 C22 8 8 45 8 78 C8 103 26 118 50 118 C74 118 92 103 92 78 C92 45 78 8 50 8Z" fill="#FDE047" stroke="#D97706" stroke-width="5"/>
+              <path d="M34 30 C28 42 22 58 26 75" stroke="#FEF08A" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+            </svg>
+            <p class="text-senior-body font-black text-amber-950 mt-3 bg-amber-200/90 px-4 py-1 rounded-xl border border-amber-300">
+              請放入🟡 黃色籃子
+            </p>
+          </div>
+
+          <!-- 指示說明 -->
+          <ul class="space-y-3 text-senior-body font-bold text-amber-950 mt-4">
+            <li class="flex items-center gap-3">
+              <span class="text-amber-700 font-extrabold text-3xl">✓</span>
+              <span>目標籃子：<strong class="text-amber-950 bg-amber-200 px-2 py-0.5 rounded-lg underline underline-offset-4 decoration-amber-500">【黃色籃子 🟡】</strong></span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 實體計數記分板 -->
+        <div class="mt-6 pt-4 border-t-2 border-amber-300/80 flex items-center justify-between bg-amber-50/80 p-3 rounded-2xl">
+          <span class="text-senior-body font-black text-amber-950">目前分類數量：</span>
+          <div class="flex items-center space-x-2">
+            <button onclick="adjustScore('egg', -1)" class="w-12 h-12 bg-amber-200 hover:bg-amber-300 text-amber-950 font-black text-3xl rounded-xl shadow active:scale-95 border border-amber-400">-</button>
+            <span id="eggCount" class="text-3xl sm:text-4xl font-black text-orange-600 px-3 min-w-[3rem] text-center">0</span>
+            <button onclick="adjustScore('egg', 1)" class="w-12 h-12 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-3xl rounded-xl shadow active:scale-95 border border-amber-500">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右區塊：鴨蛋 (淡紫色系) -->
+      <div class="bg-gradient-to-br from-purple-100 via-violet-100 to-purple-200 border-4 border-purple-400 rounded-3xl p-5 sm:p-7 shadow-lg flex flex-col justify-between">
+        <div>
+          <!-- 卡片頂部標題 -->
+          <div class="flex items-center justify-between bg-purple-300/90 px-4 py-3 rounded-2xl mb-4 border-2 border-purple-400">
+            <h2 class="text-senior-title font-black text-purple-950 flex items-center gap-2">
+              <span>🦆</span> 鴨蛋
+            </h2>
+            <span class="bg-purple-800 text-white font-extrabold text-xl px-4 py-1.5 rounded-full shadow">
+              白色籃子 ⚪
+            </span>
+          </div>
+
+          <!-- 視覺圖示區 -->
+          <div class="bg-white/85 rounded-2xl p-5 my-3 text-center border-2 border-purple-300 shadow-inner flex flex-col items-center justify-center">
+            <svg class="w-28 h-28 sm:w-36 sm:h-36 drop-shadow-md" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M50 8 C22 8 8 45 8 78 C8 103 26 118 50 118 C74 118 92 103 92 78 C92 45 78 8 50 8Z" fill="#FFFFFF" stroke="#8B5CF6" stroke-width="5"/>
+              <path d="M34 30 C28 42 22 58 26 75" stroke="#DDD6FE" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+            </svg>
+            <p class="text-senior-body font-black text-purple-950 mt-3 bg-purple-200/90 px-4 py-1 rounded-xl border border-purple-300">
+              請放入⚪ 白色籃子
+            </p>
+          </div>
+
+          <!-- 指示說明 -->
+          <ul class="space-y-3 text-senior-body font-bold text-purple-950 mt-4">
+            <li class="flex items-center gap-3">
+              <span class="text-purple-700 font-extrabold text-3xl">✓</span>
+              <span>目標籃子：<strong class="text-purple-950 bg-purple-200 px-2 py-0.5 rounded-lg underline underline-offset-4 decoration-purple-400">【白色籃子 ⚪】</strong></span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 實體計數記分板 -->
+        <div class="mt-6 pt-4 border-t-2 border-purple-300/80 flex items-center justify-between bg-purple-50/80 p-3 rounded-2xl">
+          <span class="text-senior-body font-black text-purple-950">目前分類數量：</span>
+          <div class="flex items-center space-x-2">
+            <button onclick="adjustScore('duck', -1)" class="w-12 h-12 bg-purple-200 hover:bg-purple-300 text-purple-950 font-black text-3xl rounded-xl shadow active:scale-95 border border-purple-400">-</button>
+            <span id="duckCount" class="text-3xl sm:text-4xl font-black text-purple-700 px-3 min-w-[3rem] text-center">0</span>
+            <button onclick="adjustScore('duck', 1)" class="w-12 h-12 bg-purple-300 hover:bg-purple-400 text-purple-950 font-black text-3xl rounded-xl shadow active:scale-95 border border-purple-400">+</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 4. 遊戲目標與讚賞獎勵區塊 (淺藍色系) -->
+    <section class="bg-gradient-to-r from-sky-100 via-blue-100 to-sky-200 rounded-3xl p-5 sm:p-7 shadow-lg border-4 border-sky-300 text-slate-900 space-y-4">
+      <div class="flex items-center justify-center space-x-3 text-center">
+        <span class="text-4xl">🎯</span>
+        <h3 class="text-senior-subtitle font-black tracking-wide text-sky-950">活動任務與獎勵目標</h3>
+      </div>
+      
+      <p class="text-senior-body font-extrabold leading-relaxed text-center">
+        請在限時內，將 <strong class="bg-yellow-300 text-slate-900 px-3 py-1 rounded-xl border border-yellow-400">雞蛋 🥚</strong> 與 <strong class="bg-white text-slate-900 px-3 py-1 rounded-xl border border-slate-300">鴨蛋 🦆</strong> 正確分類放入對應顏色的籃子！
+      </p>
+
+      <!-- 完成時間目標讚賞標籤 -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
+          <div class="text-amber-800 font-bold text-lg">⏱️ 2 分鐘內完成</div>
+          <div class="text-2xl sm:text-3xl font-black text-amber-600 mt-1">「唔錯啊」👍</div>
+        </div>
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
+          <div class="text-teal-800 font-bold text-lg">⏱️ 1分30秒內完成</div>
+          <div class="text-2xl sm:text-3xl font-black text-teal-600 mt-1">「好好啊」🌟</div>
+        </div>
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
+          <div class="text-orange-800 font-bold text-lg">⏱️ 1 分鐘內完成</div>
+          <div class="text-2xl sm:text-3xl font-black text-orange-600 mt-1">「好叻啊」🏆</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 倒數計時器與超大實體感控制區 -->
+    <section id="timerSection" class="bg-white border-4 border-amber-300 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center">
+      
+      <!-- 時間選擇按鈕 -->
+      <div>
+        <label class="block text-senior-body font-black text-slate-700 mb-3">
+          ⏱️ 請選擇遊戲時間：
+        </label>
+        <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+          <button onclick="setTimer(60)" class="time-preset-btn bg-amber-100 hover:bg-amber-200 text-amber-950 text-2xl font-black px-6 py-3 rounded-2xl border-2 border-amber-400 shadow-sm active:scale-95 transition">
+            1 分鐘
+          </button>
+          <button onclick="setTimer(120)" class="time-preset-btn bg-amber-400 text-amber-950 text-2xl font-black px-6 py-3 rounded-2xl border-2 border-amber-500 shadow-md active:scale-95 transition ring-4 ring-amber-300/50">
+            2 分鐘 (預設)
+          </button>
+          <button onclick="setTimer(180)" class="time-preset-btn bg-amber-100 hover:bg-amber-200 text-amber-950 text-2xl font-black px-6 py-3 rounded-2xl border-2 border-amber-400 shadow-sm active:scale-95 transition">
+            3 分鐘
+          </button>
+        </div>
+      </div>
+
+      <!-- 顯眼巨型數位倒數計時器 -->
+      <div class="bg-slate-900 text-emerald-400 rounded-3xl py-6 px-8 inline-block shadow-2xl border-8 border-slate-700 max-w-md w-full my-2">
+        <div class="text-lg font-bold text-slate-400 tracking-wider mb-1">倒數時間 REMAINING TIME</div>
+        <div id="timerDisplay" class="text-6xl sm:text-7xl lg:text-8xl font-black tracking-widest font-mono drop-shadow-[0_0_12px_rgba(52,211,153,0.6)]">
+          02:00
+        </div>
+      </div>
+
+      <!-- 超大實體感控制按鈕 -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto pt-2">
+        
+        <!-- 開始按鈕 🟢 -->
+        <button id="startBtn" onclick="startTimer()" class="btn-tactile bg-emerald-500 hover:bg-emerald-600 text-white text-senior-subtitle font-black py-5 px-6 rounded-3xl border-b-8 border-emerald-700 flex items-center justify-center space-x-3 w-full">
+          <span class="text-3xl sm:text-4xl">🟢</span>
+          <span>開 始</span>
+        </button>
+
+        <!-- 暫停按鈕 🟡 -->
+        <button id="pauseBtn" onclick="pauseTimer()" class="btn-tactile bg-amber-400 hover:bg-amber-500 text-amber-950 text-senior-subtitle font-black py-5 px-6 rounded-3xl border-b-8 border-amber-600 flex items-center justify-center space-x-3 w-full">
+          <span class="text-3xl sm:text-4xl">🟡</span>
+          <span>暫 停</span>
+        </button>
+
+        <!-- 重設按鈕 🔴 -->
+        <button id="resetBtn" onclick="resetTimer()" class="btn-tactile bg-rose-500 hover:bg-rose-600 text-white text-senior-subtitle font-black py-5 px-6 rounded-3xl border-b-8 border-rose-700 flex items-center justify-center space-x-3 w-full">
+          <span class="text-3xl sm:text-4xl">🔴</span>
+          <span>重 設</span>
+        </button>
+
+      </div>
+
+      <!-- 聲音開關控制 -->
+      <div class="pt-2">
+        <button onclick="toggleSound()" id="soundToggleBtn" class="text-lg font-bold text-slate-700 bg-slate-100 px-5 py-2.5 rounded-xl hover:bg-slate-200 transition border border-slate-300">
+          🔊 聲音提示：開啟
+        </button>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- 完成恭喜彈窗 Modal -->
+  <div id="finishModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300 p-4">
+    <div class="bg-white border-8 border-amber-400 rounded-3xl p-6 sm:p-10 max-w-2xl w-full text-center shadow-2xl transform scale-90 transition-transform duration-300 space-y-6" id="modalContent">
+      
+      <div class="text-7xl sm:text-8xl animate-bounce">🎉🏆🎊</div>
+      
+      <h2 class="text-senior-title font-black text-orange-600">
+        太棒了！恭喜完成活動！
+      </h2>
+
+      <!-- 動態時間讚賞評級標籤 -->
+      <div id="modalPraiseBadge" class="inline-block bg-amber-400 text-amber-950 text-2xl sm:text-3xl font-black px-6 py-2 rounded-2xl shadow-md border-2 border-amber-500">
+        「好叻啊」🏆
+      </div>
+      
+      <p class="text-senior-body font-bold text-slate-700">
+        老友記手眼協調超厲害！為您的努力熱烈掌聲！
+      </p>
+
+      <!-- 總成績呈現 -->
+      <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 flex justify-around items-center">
+        <div>
+          <div class="text-lg text-amber-900 font-bold">雞蛋數量 🥚</div>
+          <div id="modalEggCount" class="text-4xl font-black text-orange-600">0</div>
+        </div>
+        <div class="text-3xl font-bold text-amber-400">+</div>
+        <div>
+          <div class="text-lg text-purple-900 font-bold">鴨蛋數量 🦆</div>
+          <div id="modalDuckCount" class="text-4xl font-black text-purple-600">0</div>
+        </div>
+        <div class="text-3xl font-bold text-amber-400">=</div>
+        <div>
+          <div class="text-lg text-slate-800 font-bold">總計 🌟</div>
+          <div id="modalTotalCount" class="text-4xl font-black text-amber-600">0</div>
+        </div>
+      </div>
+
+      <button onclick="closeModal()" class="btn-tactile bg-amber-400 hover:bg-amber-500 text-amber-950 text-senior-subtitle font-black py-4 px-10 rounded-2xl border-b-6 border-amber-600 w-full sm:w-auto">
+        知道啦！再次挑戰 🔄
+      </button>
+
+    </div>
+  </div>
+
+  <script>
+    // --- 1. 即時日期與時間顯示 ---
+    function updateClock() {
+      const now = new Date();
+      
+      // 格式化日期：2026年9月28日 星期一
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const date = now.getDate();
+      const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      const dayName = days[now.getDay()];
+
+      const formattedDate = `${year}年${month}月${date}日 ${dayName}`;
+      
+      // 更新放大版獨立日期區塊
+      const bigDateEl = document.getElementById('bigDateDisplay');
+      if (bigDateEl) {
+        bigDateEl.textContent = formattedDate;
+      }
+
+      // 格式化時間
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      const formattedHours = String(hours).padStart(2, '0');
+
+      document.getElementById('clockDisplay').textContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- 2. 實體記分板邏輯 ---
+    let eggScore = 0;
+    let duckScore = 0;
+
+    function adjustScore(type, delta) {
+      playBeep(440, 0.05); // 按鈕音
+      if (type === 'egg') {
+        eggScore = Math.max(0, eggScore + delta);
+        document.getElementById('eggCount').textContent = eggScore;
+      } else if (type === 'duck') {
+        duckScore = Math.max(0, duckScore + delta);
+        document.getElementById('duckCount').textContent = duckScore;
+      }
+    }
+
+    // --- 3. Web Audio API 音效 ---
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundToggleBtn');
+      if (soundEnabled) {
+        btn.textContent = '🔊 聲音提示：開啟';
+        playBeep(600, 0.1);
+      } else {
+        btn.textContent = '🔇 聲音提示：已關閉';
+      }
+    }
+
+    function playBeep(freq = 440, duration = 0.1, type = 'sine') {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.log("Audio play error", e);
+      }
+    }
+
+    // 歡慶勝利音效
+    function playFanfare() {
+      if (!soundEnabled) return;
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; // C E G C E G
+      notes.forEach((freq, idx) => {
+        setTimeout(() => {
+          playBeep(freq, 0.25, 'triangle');
+        }, idx * 150);
+      });
+    }
+
+    // --- 4. 倒數計時器邏輯 ---
+    let initialTime = 120; // 預設 2 分鐘
+    let timeRemaining = 120;
+    let timerInterval = null;
+    let isRunning = false;
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timeRemaining / 60);
+      const secs = timeRemaining % 60;
+      const formattedMins = String(mins).padStart(2, '0');
+      const formattedSecs = String(secs).padStart(2, '0');
+      document.getElementById('timerDisplay').textContent = `${formattedMins}:${formattedSecs}`;
+    }
+
+    function setTimer(seconds) {
+      playBeep(520, 0.08);
+      pauseTimer();
+      initialTime = seconds;
+      timeRemaining = seconds;
+      updateTimerDisplay();
+
+      // 更新選擇按鈕外觀
+      document.querySelectorAll('.time-preset-btn').forEach(btn => {
+        btn.classList.remove('bg-amber-400', 'ring-4', 'ring-amber-300/50');
+        btn.classList.add('bg-amber-100');
+      });
+      if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.remove('bg-amber-100');
+        window.event.currentTarget.classList.add('bg-amber-400', 'ring-4', 'ring-amber-300/50');
+      }
+    }
+
+    function startTimer() {
+      initAudio();
+      if (isRunning) return;
+      playBeep(660, 0.15);
+      isRunning = true;
+      
+      document.getElementById('timerSection').classList.add('timer-running');
+
+      timerInterval = setInterval(() => {
+        if (timeRemaining > 0) {
+          timeRemaining--;
+          updateTimerDisplay();
+
+          // 最後 5 秒每秒給出音效提示
+          if (timeRemaining <= 5 && timeRemaining > 0) {
+            playBeep(880, 0.15, 'square');
+          }
+        } else {
+          // 時間到！
+          pauseTimer();
+          playFanfare();
+          triggerConfetti();
+          showModal();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (isRunning) playBeep(350, 0.1);
+      isRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById('timerSection').classList.remove('timer-running');
+    }
+
+    function resetTimer() {
+      playBeep(300, 0.15);
+      pauseTimer();
+      timeRemaining = initialTime;
+      updateTimerDisplay();
+    }
+
+    // --- 5. 完成 Modal & 評級算分 ---
+    function showModal() {
+      document.getElementById('modalEggCount').textContent = eggScore;
+      document.getElementById('modalDuckCount').textContent = duckScore;
+      document.getElementById('modalTotalCount').textContent = eggScore + duckScore;
+
+      // 計算實際耗時 (elapsed time)
+      const elapsedTime = initialTime - timeRemaining;
+      const praiseBadge = document.getElementById('modalPraiseBadge');
+
+      if (elapsedTime <= 60) {
+        praiseBadge.textContent = '「好叻啊」🏆';
+        praiseBadge.className = 'inline-block bg-amber-400 text-amber-950 text-2xl sm:text-3xl font-black px-6 py-2 rounded-2xl shadow-md border-2 border-amber-500';
+      } else if (elapsedTime <= 90) {
+        praiseBadge.textContent = '「好好啊」🌟';
+        praiseBadge.className = 'inline-block bg-emerald-400 text-emerald-950 text-2xl sm:text-3xl font-black px-6 py-2 rounded-2xl shadow-md border-2 border-emerald-500';
+      } else {
+        praiseBadge.textContent = '「唔錯啊」👍';
+        praiseBadge.className = 'inline-block bg-sky-400 text-sky-950 text-2xl sm:text-3xl font-black px-6 py-2 rounded-2xl shadow-md border-2 border-sky-500';
+      }
+
+      const modal = document.getElementById('finishModal');
+      const modalContent = document.getElementById('modalContent');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modalContent.classList.remove('scale-90');
+      modalContent.classList.add('scale-100');
+    }
+
+    function closeModal() {
+      playBeep(500, 0.1);
+      const modal = document.getElementById('finishModal');
+      const modalContent = document.getElementById('modalContent');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modalContent.classList.remove('scale-100');
+      modalContent.classList.add('scale-90');
+      resetTimer();
+    }
+
+    // --- 6. 彩帶慶祝動畫 (Confetti) ---
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function triggerConfetti() {
+      particles = [];
+      const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', '#ef4444'];
+      for (let i = 0; i < 150; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 18,
+          vy: (Math.random() - 0.8) * 18,
+          size: Math.random() * 12 + 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 10
+        });
+      }
+      animateConfetti();
+    }
+
+    let confettiAnimationId = null;
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.3; // 重力
+        p.rotation += p.rotationSpeed;
+
+        if (p.y < canvas.height) {
+          alive = true;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        }
+      });
+
+      if (alive) {
+        confettiAnimationId = requestAnimationFrame(animateConfetti);
+      } else {
+        cancelAnimationFrame(confettiAnimationId);
+      }
+    }
+  </script>
+</body>
+</html>
