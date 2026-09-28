@@ -215,19 +215,33 @@
         請在限時內，將 <strong class="bg-yellow-300 text-slate-900 px-3 py-1 rounded-xl border border-yellow-400">雞蛋 🥚</strong> 與 <strong class="bg-white text-slate-900 px-3 py-1 rounded-xl border border-slate-300">鴨蛋 🦆</strong> 正確分類放入對應顏色的籃子！
       </p>
 
-      <!-- 完成時間目標讚賞標籤 -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
-          <div class="text-amber-800 font-bold text-lg">⏱️ 2 分鐘內完成</div>
-          <div class="text-2xl sm:text-3xl font-black text-amber-600 mt-1">「唔錯啊」👍</div>
+      <!-- 完成時間目標讚賞標籤 (倒序排列：由最快到預設) -->
+      <div class="flex flex-col space-y-3 pt-2 max-w-2xl mx-auto">
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between border-2 border-sky-300 shadow-sm gap-2">
+          <div class="text-orange-950 font-black text-xl sm:text-2xl flex items-center gap-2">
+            <span>⏱️ 1 分鐘內完成</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-orange-600 bg-orange-100 px-5 py-1.5 rounded-xl border border-orange-300">
+            「好叻啊」🏆
+          </div>
         </div>
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
-          <div class="text-teal-800 font-bold text-lg">⏱️ 1分30秒內完成</div>
-          <div class="text-2xl sm:text-3xl font-black text-teal-600 mt-1">「好好啊」🌟</div>
+
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between border-2 border-sky-300 shadow-sm gap-2">
+          <div class="text-teal-950 font-black text-xl sm:text-2xl flex items-center gap-2">
+            <span>⏱️ 1分30秒內完成</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-teal-600 bg-teal-100 px-5 py-1.5 rounded-xl border border-teal-300">
+            「好好啊」🌟
+          </div>
         </div>
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
-          <div class="text-orange-800 font-bold text-lg">⏱️ 1 分鐘內完成</div>
-          <div class="text-2xl sm:text-3xl font-black text-orange-600 mt-1">「好叻啊」🏆</div>
+
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between border-2 border-sky-300 shadow-sm gap-2">
+          <div class="text-amber-950 font-black text-xl sm:text-2xl flex items-center gap-2">
+            <span>⏱️ 2 分鐘內完成</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-amber-600 bg-amber-100 px-5 py-1.5 rounded-xl border border-amber-300">
+            「唔錯啊」👍
+          </div>
         </div>
       </div>
     </section>
