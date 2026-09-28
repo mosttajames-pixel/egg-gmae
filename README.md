@@ -215,19 +215,33 @@
         請在限時內，將 <strong class="bg-yellow-300 text-slate-900 px-3 py-1 rounded-xl border border-yellow-400">雞蛋 🥚</strong> 與 <strong class="bg-white text-slate-900 px-3 py-1 rounded-xl border border-slate-300">鴨蛋 🦆</strong> 正確分類放入對應顏色的籃子！
       </p>
 
-      <!-- 完成時間目標讚賞標籤 -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
-          <div class="text-amber-800 font-bold text-lg">⏱️ 2 分鐘內完成</div>
-          <div class="text-2xl sm:text-3xl font-black text-amber-600 mt-1">「唔錯啊」👍</div>
+      <!-- 完成時間目標讚賞標籤 (放大 1.5 倍，倒序排列：由最快到預設) -->
+      <div class="flex flex-col space-y-4 pt-2 max-w-4xl mx-auto">
+        <div class="bg-white/90 backdrop-blur-md rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between border-4 border-sky-300 shadow-md gap-3">
+          <div class="text-orange-950 font-black text-2xl sm:text-3xl lg:text-4xl flex items-center gap-3">
+            <span>⏱️ 1 分鐘內完成</span>
+          </div>
+          <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-orange-600 bg-orange-100 px-6 py-2.5 rounded-2xl border-2 border-orange-300">
+            「好叻啊」🏆
+          </div>
         </div>
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
-          <div class="text-teal-800 font-bold text-lg">⏱️ 1分30秒內完成</div>
-          <div class="text-2xl sm:text-3xl font-black text-teal-600 mt-1">「好好啊」🌟</div>
+
+        <div class="bg-white/90 backdrop-blur-md rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between border-4 border-sky-300 shadow-md gap-3">
+          <div class="text-teal-950 font-black text-2xl sm:text-3xl lg:text-4xl flex items-center gap-3">
+            <span>⏱️ 1分30秒內完成</span>
+          </div>
+          <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-teal-600 bg-teal-100 px-6 py-2.5 rounded-2xl border-2 border-teal-300">
+            「好好啊」🌟
+          </div>
         </div>
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-3 text-center border-2 border-sky-300 shadow-sm">
-          <div class="text-orange-800 font-bold text-lg">⏱️ 1 分鐘內完成</div>
-          <div class="text-2xl sm:text-3xl font-black text-orange-600 mt-1">「好叻啊」🏆</div>
+
+        <div class="bg-white/90 backdrop-blur-md rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between border-4 border-sky-300 shadow-md gap-3">
+          <div class="text-amber-950 font-black text-2xl sm:text-3xl lg:text-4xl flex items-center gap-3">
+            <span>⏱️ 2 分鐘內完成</span>
+          </div>
+          <div class="text-3xl sm:text-4xl lg:text-5xl font-black text-amber-600 bg-amber-100 px-6 py-2.5 rounded-2xl border-2 border-amber-300">
+            「唔錯啊」👍
+          </div>
         </div>
       </div>
     </section>
@@ -253,10 +267,10 @@
         </div>
       </div>
 
-      <!-- 顯眼巨型數位倒數計時器 -->
-      <div class="bg-slate-900 text-emerald-400 rounded-3xl py-6 px-8 inline-block shadow-2xl border-8 border-slate-700 max-w-md w-full my-2">
-        <div class="text-lg font-bold text-slate-400 tracking-wider mb-1">倒數時間 REMAINING TIME</div>
-        <div id="timerDisplay" class="text-6xl sm:text-7xl lg:text-8xl font-black tracking-widest font-mono drop-shadow-[0_0_12px_rgba(52,211,153,0.6)]">
+      <!-- 顯眼巨型數位倒數計時器 (放大 1.5 倍) -->
+      <div class="bg-slate-900 text-emerald-400 rounded-3xl py-6 px-6 sm:px-10 inline-block shadow-2xl border-8 border-slate-700 max-w-xl w-full my-2">
+        <div class="text-xl sm:text-2xl font-black text-slate-300 tracking-wider mb-2">倒數時間 REMAINING TIME</div>
+        <div id="timerDisplay" class="text-7xl sm:text-8xl lg:text-[10rem] leading-none font-black tracking-widest font-mono drop-shadow-[0_0_18px_rgba(52,211,153,0.7)] py-2">
           02:00
         </div>
       </div>
